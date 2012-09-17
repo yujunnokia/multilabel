@@ -62,10 +62,10 @@ MultiLabel.GLM.Evaluate <- function(predictions, trueLabels, metrics=c("HammingL
 			metric <- MultiLabel.Evaluate(trueLabels, predLabels, metrics)
 			
 			# store the best value for each metric
-			if (!is.null(bestMetrics[["HammingLoss"]]) && (bestMetrics[["HammingLoss"]] > metric[["HammingLoss"]])) { bestMetrics[["HammingLoss"]] <- metric[["HammingLoss"]] }
+			if (!is.null(bestMetrics[["HammingLoss"]]) && (bestMetrics[["HammingLoss"]] > metric[["HammingLoss"]])) { bestMetrics[["HammingLoss"]] <- metric[["HammingLoss"]]; bestMetrics[["HammingLossLabel"]] <- metric[["HammingLossLabel"]] }
 			if (!is.null(bestMetrics[["ExactMatch"]])  && (bestMetrics[["ExactMatch"]]  < metric[["ExactMatch"]]))  { bestMetrics[["ExactMatch"]]  <- metric[["ExactMatch"]] }
 			if (!is.null(bestMetrics[["SiteAUC"]])     && (bestMetrics[["SiteAUC"]]     < metric[["SiteAUC"]]))     { bestMetrics[["SiteAUC"]]     <- metric[["SiteAUC"]] }
-			if (!is.null(bestMetrics[["SpeciesAUC"]])  && (bestMetrics[["SpeciesAUC"]]  < metric[["SpeciesAUC"]]))  { bestMetrics[["SpeciesAUC"]]  <- metric[["SpeciesAUC"]] }
+			if (!is.null(bestMetrics[["SpeciesAUC"]])  && (bestMetrics[["SpeciesAUC"]]  < metric[["SpeciesAUC"]]))  { bestMetrics[["SpeciesAUC"]]  <- metric[["SpeciesAUC"]]; bestMetrics[["SpeciesAUCLabel"]] <- metric[["SpeciesAUCLabel"]] }
 			if (!is.null(bestMetrics[["MicroF1"]])     && (bestMetrics[["MicroF1"]]     < metric[["MicroF1"]]))     { bestMetrics[["MicroF1"]]     <- metric[["MicroF1"]] }
 			if (!is.null(bestMetrics[["MacroF1"]])     && (bestMetrics[["MacroF1"]]     < metric[["MacroF1"]]))     { bestMetrics[["MacroF1"]]     <- metric[["MacroF1"]] }
 		} # lambdas

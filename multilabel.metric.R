@@ -38,6 +38,21 @@ HammingLoss <- function(Y,Z)
 	return(sum(Y != Z)/(nRow*nCol))
 }
 
+HammingLossLabel <- function(Y,Z) 
+{
+	if (nrow(Y) != nrow(Z) || ncol(Y) != ncol(Z)) {
+		stop("Dim of Y and Z does not match...")
+	}
+	
+	nRow <- nrow(Y)
+	nCol <- ncol(Y)
+	
+	Z[Z < THRESHOLD] <- 0
+	Z[Z >= THRESHOLD] <- 1
+	
+	return(colSums(Y != Z)/nRow)
+}
+
 #
 # compute Ranking Loss.
 #
@@ -102,6 +117,21 @@ SpeciesAUC <- function(Y,Z)
 	}
 	
 	return(mean(speciesAUC))
+}
+
+SpeciesAUCLabel <- function(Y,Z) 
+{
+	if (nrow(Y) != nrow(Z) || ncol(Y) != ncol(Z)) {
+		stop("Dim of Y and Z does not match...")
+	}
+	
+	nCol <- ncol(Y)
+	speciesAUC <- rep(0,nCol)
+	for (j in 1:nCol) {
+		speciesAUC[j] <- auc(Y[,j],Z[,j])
+	}
+	
+	return(speciesAUC)
 }
 
 #
@@ -286,70 +316,72 @@ MultiLabel.Evaluate <- function(trueLabels, predLabels, metrics=c("HammingLoss")
 	if (sum(metrics == "HammingLoss") == 1) 
 	{
 		results[["HammingLoss"]] <- HammingLoss(trueLabels,predLabels)
-		cat("Hamming Loss is",results[["HammingLoss"]],"\n")
+		results[["HammingLossLabel"]] <- HammingLossLabel(trueLabels,predLabels)
+		#cat("Hamming Loss is",results[["HammingLoss"]],"\n")
 	}
 	
 	# ExactMatch
 	if (sum(metrics == "ExactMatch") == 1) 
 	{
 		results[["ExactMatch"]] <- ExactMatch(trueLabels,predLabels)
-		cat("Exact Match is",results[["ExactMatch"]] ,"\n")
+		#cat("Exact Match is",results[["ExactMatch"]] ,"\n")
 	}
 	
 	# MicroF1
 	if (sum(metrics == "MicroF1") == 1) 
 	{
 		results[["MicroF1"]] <- MicroMeasure(trueLabels,predLabels)$F1
-		cat("Micro F1 is",results[["MicroF1"]],"\n")
+		#cat("Micro F1 is",results[["MicroF1"]],"\n")
 	}
 	
 	# MacroF1
 	if (sum(metrics == "MacroF1") == 1) 
 	{
 		results[["MacroF1"]] <- MacroMeasure(trueLabels,predLabels)$F1
-		cat("Macro F1 is",results[["MacroF1"]],"\n")
+		#cat("Macro F1 is",results[["MacroF1"]],"\n")
 	}
 	
 	# RankingLoss
 	if (sum(metrics == "RankingLoss") == 1) 
 	{
 		results[["RankingLoss"]] <- RankingLoss(trueLabels,predLabels)
-		cat("Ranking Loss is",results[["RankingLoss"]],"\n")	
+		#cat("Ranking Loss is",results[["RankingLoss"]],"\n")	
 	}
 	
 	# SiteAUC
 	if (sum(metrics == "SpeciesAUC") == 1) 
 	{
 		results[["SiteAUC"]] <- SiteAUC(trueLabels,predLabels)
-		cat("Site AUC is",results[["SiteAUC"]],"\n")
+		#cat("Site AUC is",results[["SiteAUC"]],"\n")
 	}
 	
 	# SpeciesAUC
 	if (sum(metrics == "SpeciesAUC") == 1) 
 	{
 		results[["SpeciesAUC"]] <- SpeciesAUC(trueLabels,predLabels)
-		cat("Species AUC is",results[["SpeciesAUC"]],"\n")
+		results[["SpeciesAUCLabel"]] <- SpeciesAUCLabel(trueLabels,predLabels)
+		#cat("Species AUC is",results[["SpeciesAUC"]],"\n")
 	}
 	
 	# OneError
 	if (sum(metrics == "OneError") == 1) 
 	{
 		results[["OneError"]] <- OneError(trueLabels,predLabels)
-		cat("One Error is",results[["OneError"]],"\n")
+		#cat("One Error is",results[["OneError"]],"\n")
 	}
 	
 	# Coverage
 	if (sum(metrics == "Coverage") == 1) 
 	{
 		results[["Coverage"]] <- Coverage(trueLabels,predLabels)
-		cat("Coverage is",results[["Coverage"]],"\n")
+		#cat("Coverage is",results[["Coverage"]],"\n")
 	}
 	
 	# AveragePrecision
 	if (sum(metrics == "AveragePrecision") == 1) 
 	{
 		results[["AveragePrecision"]] <- AveragePrecision(trueLabels,predLabels)
-		cat("Average Precision is",results[["AveragePrecision"]],"\n")
+		#cat("Average Precision is",results[["AveragePrecision"]],"\n")
 	}
 	
 	return(results)
