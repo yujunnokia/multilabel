@@ -1,52 +1,35 @@
 # multilabel evaluation 
+#  Usage:
+#	Rscript multilabel.eval.R -args HJAbirds BR_CV
 # 
 # Author: Jun Yu
 # Version: Sep, 2012
 ###############################################################################
 
 
-source("multilabel/multilabel.buildinfo.R")
-source("multilabel/multilabel.utility.R")
+# set working directory	
+setwd("/Users/yujunnokia/workspace/multilabel")
+
+source("./multilabel.buildinfo.R")
+source("./multilabel.utility.R")
 
 ######################
 # experiment settings
 ######################
-dataset <- "yeast"
-learner <- "ECC"  # BR ECC
+dataset <- "ebirdNY" # yeast HJAbirds HBRbirds ebirdNY ebirdCO ebirdMA ebirdMD
+learner <- "ECC_Beta"  # BR ECC ECC_Beta ECC_Cheat
 
-# BR result
-{
-	# load predictions
-	resultFile <- paste("./result/multilabel/",dataset,"/",dataset,"_BR.RData",sep="")
-	load(resultFile)
-	
-	# evaluate
-	results <- MultiLabel.GLM.Evaluate(predictions, data$testDataY, 
-			metrics=c("HammingLoss", "ExactMatch", "SpeciesAUC", "SiteAUC", "MacroF1", "MicroF1"))
-	print(results[["HammingLossLabel"]])	
-	print(results[["SpeciesAUCLabel"]])
-	
-	resultsBR <- results
-}
+args <- commandArgs(trailingOnly = TRUE)
+#dataset <- as.character(args[2])
+#learner <- as.character(args[3])
 
-# ECC result
-{
-	# load predictions
-	resultFile <- paste("./result/multilabel/",dataset,"/",dataset,"_ECC.RData",sep="")
-	load(resultFile)
-	
-	# evaluate
-	results <- MultiLabel.GLM.Evaluate(predictions, data$testDataY, 
-			metrics=c("HammingLoss", "ExactMatch", "SpeciesAUC", "SiteAUC", "MacroF1", "MicroF1"))
-	print(results[["HammingLossLabel"]])	
-	print(results[["SpeciesAUCLabel"]])
-	
-	resultsECC <- results
-}
+# load predictions
+predictionFile <- paste("../result/multilabel/",dataset,"/",dataset,"_",learner,".RData",sep="")
+load(predictionFile)
 
-# compute label frequence
-dataY <- rbind(data$trainDataY, data$testDataY)
-dataY <- as.matrix(dataY)
-class(dataY) <- "numeric"
-labelFreq <- colSums(dataY) / nrow(dataY)
-print (labelFreq)
+# evaluate
+results <- MultiLabel.Evaluate(data$testDataY, predictions, 
+		metrics=c("HammingLoss", "ExactMatch", "SpeciesAUC", "SiteAUC", "MacroF1", "MicroF1"))
+print(results)	
+
+

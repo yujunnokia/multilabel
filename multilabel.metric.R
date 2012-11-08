@@ -68,6 +68,10 @@ RankingLoss <- function(Y,Z)
 	nRow <- nrow(Y)
 	siteAUC <- req(0,nRow)
 	for (i in 1:nRow) {
+		if (sum(Y[i,]) == 0 || mean(Y[i,]) == 1) {
+			siteAUC[i] <- 0.5
+			next
+		}
 		siteAUC[i] <- auc(Y[i,],Z[i,])
 	}
 	
@@ -113,6 +117,10 @@ SpeciesAUC <- function(Y,Z)
 	nCol <- ncol(Y)
 	speciesAUC <- rep(0,nCol)
 	for (j in 1:nCol) {
+		if (sum(Y[,j]) == 0) {
+			speciesAUC[j] <- 0.5
+			next
+		}
 		speciesAUC[j] <- auc(Y[,j],Z[,j])
 	}
 	
@@ -128,6 +136,10 @@ SpeciesAUCLabel <- function(Y,Z)
 	nCol <- ncol(Y)
 	speciesAUC <- rep(0,nCol)
 	for (j in 1:nCol) {
+		if (sum(Y[,j]) == 0) {
+			speciesAUC[j] <- 0.5
+			next
+		}
 		speciesAUC[j] <- auc(Y[,j],Z[,j])
 	}
 	
@@ -149,6 +161,10 @@ SiteAUC <- function(Y,Z)
 	nRow <- nrow(Y)
 	siteAUC <- rep(0,nRow)
 	for (i in 1:nRow) {
+		if (sum(Y[i,]) == 0 || mean(Y[i,]) == 1) {
+			siteAUC[i] <- 0.5
+			next
+		}
 		siteAUC[i] <- auc(Y[i,],Z[i,])
 	}
 	
@@ -295,6 +311,7 @@ MacroMeasure <- function(Y,Z)
 	precision <- precision[!is.nan(precision)]
 	recall <- recall[!is.nan(recall)]
 	F1 <- F1[!is.nan(F1)]
+#	F1[is.nan(F1)] <- 0
 	
 	return(list(precision=mean(precision),recall=mean(recall),F1=mean(F1)))
 }
@@ -309,14 +326,14 @@ MultiLabel.Evaluate <- function(trueLabels, predLabels, metrics=c("HammingLoss")
 	class(trueLabels) <- "numeric"
 	predLabels <- as.matrix(predLabels)
 	class(trueLabels) <- "numeric"
-
+	
 	results <- list()
 	
 	# HammingLoss
 	if (sum(metrics == "HammingLoss") == 1) 
 	{
 		results[["HammingLoss"]] <- HammingLoss(trueLabels,predLabels)
-		results[["HammingLossLabel"]] <- HammingLossLabel(trueLabels,predLabels)
+#		results[["HammingLossLabel"]] <- HammingLossLabel(trueLabels,predLabels)
 		#cat("Hamming Loss is",results[["HammingLoss"]],"\n")
 	}
 	
@@ -331,6 +348,9 @@ MultiLabel.Evaluate <- function(trueLabels, predLabels, metrics=c("HammingLoss")
 	if (sum(metrics == "MicroF1") == 1) 
 	{
 		results[["MicroF1"]] <- MicroMeasure(trueLabels,predLabels)$F1
+		if (is.nan(results[["MicroF1"]])) {
+			results[["MicroF1"]] = 0
+		}
 		#cat("Micro F1 is",results[["MicroF1"]],"\n")
 	}
 	
@@ -338,6 +358,9 @@ MultiLabel.Evaluate <- function(trueLabels, predLabels, metrics=c("HammingLoss")
 	if (sum(metrics == "MacroF1") == 1) 
 	{
 		results[["MacroF1"]] <- MacroMeasure(trueLabels,predLabels)$F1
+		if (is.nan(results[["MacroF1"]])) {
+			results[["MacroF1"]] = 0
+		}
 		#cat("Macro F1 is",results[["MacroF1"]],"\n")
 	}
 	
@@ -349,7 +372,7 @@ MultiLabel.Evaluate <- function(trueLabels, predLabels, metrics=c("HammingLoss")
 	}
 	
 	# SiteAUC
-	if (sum(metrics == "SpeciesAUC") == 1) 
+	if (sum(metrics == "SiteAUC") == 1) 
 	{
 		results[["SiteAUC"]] <- SiteAUC(trueLabels,predLabels)
 		#cat("Site AUC is",results[["SiteAUC"]],"\n")
@@ -359,7 +382,7 @@ MultiLabel.Evaluate <- function(trueLabels, predLabels, metrics=c("HammingLoss")
 	if (sum(metrics == "SpeciesAUC") == 1) 
 	{
 		results[["SpeciesAUC"]] <- SpeciesAUC(trueLabels,predLabels)
-		results[["SpeciesAUCLabel"]] <- SpeciesAUCLabel(trueLabels,predLabels)
+#		results[["SpeciesAUCLabel"]] <- SpeciesAUCLabel(trueLabels,predLabels)
 		#cat("Species AUC is",results[["SpeciesAUC"]],"\n")
 	}
 	

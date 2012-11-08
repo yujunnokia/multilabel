@@ -4,39 +4,40 @@
 # Version: Sep, 2012
 ###############################################################################
 
-source("multilabel/multilabel.buildinfo.R")
-source("multilabel/multilabel.utility.R")
+# set working directory
+setwd("/Users/yujunnokia/workspace/multilabel")
+
+source("./multilabel.buildinfo.R")
+source("./multilabel.utility.R")
 
 ######################
 # experiment settings
 ######################
-dataset <- "medical"
-alphas <- c(0)
-lambdas <- seq(0,1,0.2)
+dataset <- "ebirdNY" # yeast HJAbirds HBRbirds ebirdNY ebirdCO ebirdMA ebirdMD
+model <- "ECC_Beta" # BR ECC ECC_Beta ECC_Cheat
+alpha <- 0
+nChains <- 10
+
+args <- commandArgs(trailingOnly = TRUE)
+#dataset <- as.character(args[2]) 
+#model <- as.character(args[3]) 
 
 # load data
-data <- MultiLabel.Load(dataset, nFeatures[[dataset]])
-trainDataX <- data$trainDataX
-trainDataY <- data$trainDataY
-testDataX <- data$testDataX
-testDataY <- data$testDataY
+data <- MultiLabel.Load.csv(dataset, nFeatures[[dataset]])
 
-# train multi-label learner
-predictions <- MultiLable.ECC.GLM(trainDataX, trainDataY, testDataX, nChains=10, alphas=alphas, lambdas=lambdas)
+# run model
+if (model == "BR") {
+	predictions <- MultiLable.BR.GLM(data$trainDataX, data$trainDataY, data$testDataX, alpha=alpha)
+} else if (model == "ECC") {
+	predictions <- MultiLable.ECC.GLM(data$trainDataX, data$trainDataY, data$testDataX, nChains=nChains, alpha=alpha)
+} else if (model == "ECC_Beta") {
+	predictions <- MultiLable.ECC.Beta.GLM(data$trainDataX, data$trainDataY, data$testDataX, nChains=nChains, alpha=alpha)
+} else if (model == "ECC_Cheat") {
+	predictions <- MultiLable.ECC.Cheat.GLM(data$trainDataX, data$trainDataY, data$testDataX, data$testDataY, nChains=nChains, alpha=alpha)
+} else {
+	stop("model is invalid...\n")
+}
 
 # save predictions
-outputFile <- paste("./result/multilabel/",dataset,"/",dataset,"_ECC.RData",sep="")
-save(dataset, alphas, lambdas, data, predictions, file=outputFile)
-
-#for (alpha in alphas) {
-#	for (lambda in lambdas) {
-#		# save predictions		
-#		outputFile <- paste("./result/multilabel/",dataset,"/",dataset,"_ECC_",alpha,"_",lambda,".csv",sep="")
-#		write.table(predictions, outputFile, sep=",", row.names=FALSE, col.names=TRUE, quote=FALSE)
-#	}
-#}
-#
-## evaluate
-#results <- MultiLabel.GLM.Evaluate(predictions, testDataY, 
-#		metrics=c("HammingLoss", "ExactMatch", "SpeciesAUC", "SiteAUC", "MacroF1", "MicroF1"))
-#print(results)
+outputFile <- paste("../result/multilabel/",dataset,"/",dataset,"_",model,".RData",sep="")
+save(dataset, alpha, data, predictions, file=outputFile)
